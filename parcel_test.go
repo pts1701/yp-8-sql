@@ -45,25 +45,22 @@ func TestAddGetDelete(t *testing.T) {
 	id, err := store.Add(parcel)
 	require.NoError(t, err)
 	require.NotZero(t, id)
+	parcel.Number = id
 
 	// get
 	// получите только что добавленную посылку, убедитесь в отсутствии ошибки
 	// проверьте, что значения всех полей в полученном объекте совпадают со значениями полей в переменной parcel
 	lastPar, err := store.Get(id)
 	require.NoError(t, err)
-	//assert.Equal(t, parcel.Number, lastPar.Number)
-	assert.Equal(t, parcel.Client, lastPar.Client)
-	assert.Equal(t, parcel.Address, lastPar.Address)
-	assert.Equal(t, parcel.Status, lastPar.Status)
-	assert.Equal(t, parcel.CreatedAt, lastPar.CreatedAt)
+	assert.Equal(t, parcel, lastPar)
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
 	// проверьте, что посылку больше нельзя получить из БД
 	err = store.Delete(id)
 	require.NoError(t, err)
-	lastPar, err = store.Get(id)
-	assert.Error(t, err)
+	_, err = store.Get(id)
+	require.Error(t, err)
 
 }
 
@@ -164,7 +161,7 @@ func TestGetByClient(t *testing.T) {
 	// убедитесь в отсутствии ошибки
 	// убедитесь, что количество полученных посылок совпадает с количеством добавленных
 	require.NoError(t, err)
-	require.Equal(t, len(parcelMap), len(storedParcels))
+	assert.Len(t, parcelMap, len(storedParcels))
 
 	// check
 	for _, parcel := range storedParcels {
@@ -172,10 +169,7 @@ func TestGetByClient(t *testing.T) {
 		// убедитесь, что все посылки из storedParcels есть в parcelMap
 		// убедитесь, что значения полей полученных посылок заполнены верно
 		check, ok := parcelMap[parcel.Number]
-		require.True(t, ok)
-		assert.Equal(t, parcel.Client, check.Client)
-		assert.Equal(t, parcel.Status, check.Status)
-		assert.Equal(t, parcel.Address, check.Address)
-		assert.Equal(t, parcel.CreatedAt, check.CreatedAt)
+		assert.True(t, ok)
+		assert.Equal(t, parcel, check)
 	}
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 )
 
 type ParcelStore struct {
@@ -23,7 +22,7 @@ func (s ParcelStore) Add(p Parcel) (int, error) {
 		sql.Named("address", p.Address),
 		sql.Named("created_at", p.CreatedAt))
 	if err != nil {
-		fmt.Println(err)
+
 		return 0, err
 	}
 
@@ -39,7 +38,7 @@ func (s ParcelStore) Add(p Parcel) (int, error) {
 func (s ParcelStore) Get(number int) (Parcel, error) {
 	// реализуйте чтение строки по заданному number
 	// здесь из таблицы должна вернуться только одна строка
-	row := s.db.QueryRow("SELECT * FROM parcel WHERE number = :number", sql.Named("number", number))
+	row := s.db.QueryRow("SELECT number, client, status, address, created_at FROM parcel WHERE number = :number", sql.Named("number", number))
 
 	// заполните объект Parcel данными из таблицы
 	p := Parcel{}
@@ -73,6 +72,10 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 		res = append(res, p)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return res, nil
 }
 
@@ -83,7 +86,7 @@ func (s ParcelStore) SetStatus(number int, status string) error {
 		sql.Named("number", number))
 	if err != nil {
 
-		fmt.Println(err)
+		return err
 	}
 
 	return nil
@@ -99,7 +102,7 @@ func (s ParcelStore) SetAddress(number int, address string) error {
 
 	if err != nil {
 
-		fmt.Println(err)
+		return err
 	}
 
 	return nil
@@ -114,7 +117,7 @@ func (s ParcelStore) Delete(number int) error {
 
 	if err != nil {
 
-		fmt.Println(err)
+		return err
 	}
 
 	return nil
